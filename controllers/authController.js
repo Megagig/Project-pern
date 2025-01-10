@@ -1,5 +1,12 @@
 const user = require('../db/models/user');
+const jwt = require('jsonwebtoken');
 
+// Generate a token
+const generateToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
 const signup = async (req, res) => {
   // Get the request body
   const body = req.body;
@@ -26,12 +33,12 @@ const signup = async (req, res) => {
   // Remove password and deletedAt from the response
   const result = newUser.toJSON();
   delete result.password;
-  delete result.deleteAt;
+  delete result.deletedAt;
 
-  result.token = 'dummytoken';
+  result.token = generateToken({ id: result.id });
 
   // Check if the user was created
-  if (!newUser) {
+  if (!result) {
     return res.status(500).json({
       status: 'error',
       message: 'Failed to create user',
@@ -40,7 +47,7 @@ const signup = async (req, res) => {
 
   return res.status(201).json({
     status: 'success',
-    data: newUser,
+    data: result,
     message: 'User created, please login',
   });
 };
