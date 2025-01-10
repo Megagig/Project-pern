@@ -1,4 +1,5 @@
-const { Model, Sequelize } = require('sequelize');
+const { Model, Sequelize, DataTypes } = require('sequelize');
+const bcryptjs = require('bcryptjs');
 const sequelize = require('../../config/dbConnect');
 
 const user = sequelize.define(
@@ -8,33 +9,45 @@ const user = sequelize.define(
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
     },
     userType: {
-      type: Sequelize.ENUM('0', '1', '2'),
+      type: DataTypes.ENUM('0', '1', '2'),
     },
     firstName: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     lastName: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     email: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     password: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
+    },
+    // implement password hashing Logic
+    confirmPassword: {
+      type: DataTypes.VIRTUAL,
+      set(value) {
+        if (value == this.password) {
+          const hashPassword = bcryptjs.hashSync(value, 10);
+          this.setDataValue('password', hashPassword);
+        } else {
+          throw new Error('Password and confirm password must be the same');
+        }
+      },
     },
     createdAt: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     updatedAt: {
       allowNull: false,
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
     deletedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
     },
   },
   {
