@@ -1,5 +1,6 @@
 const user = require('../db/models/user');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // Generate a token
 const generateToken = (payload) => {
@@ -52,4 +53,48 @@ const signup = async (req, res) => {
   });
 };
 
-module.exports = { signup };
+const login = async (req, res, next) => {
+  // Get the request body
+  const { email, password } = req.body;
+
+  // Check if the email and password are provided
+  if (!email || !password) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Please provide email and password',
+    });
+  }
+
+  // Check if the user exists
+  const existingUser = await user.findOne({ where: { email } });
+  if (!existingUser) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Invalid email or password',
+    });
+  }
+
+  // check if the password matches
+  isPasswordMatch = await bcrypt.compare(password, existingUser.password);
+  if (!isPasswordMatch) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Invalid email or password',
+    });
+  }
+  // Generate a JWT token
+  const token = generateToken({
+    id: existingUser.id,
+  });
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'User logged in successfully',
+    data: {
+      token,
+      user: existingUser,
+    }, // Return the JWT token and the user data
+  });
+};
+
+module.exports = { signup, login };
