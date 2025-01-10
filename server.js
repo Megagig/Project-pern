@@ -1,6 +1,6 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import authRoute from './routes/authRoute.js';
+const express = require('express');
+const dotenv = require('dotenv');
+const authRoute = require('./routes/authRoute');
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoute);
 
 //handle not found routes after all routes
-app.use('*', (req, res, next) => {
+app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found',
@@ -31,4 +31,3 @@ app.use('*', (req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-``;
