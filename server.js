@@ -12,13 +12,6 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Welcome to the Server',
-  });
-});
-
 //ALL ROUTES GO HERE
 
 app.use('/api/v1/auth', authRoute);
@@ -27,7 +20,7 @@ app.use('/api/v1/auth', authRoute);
 app.use(
   '*',
   catchAsync(async (req, res, next) => {
-    throw new AppError('404 Not Found', 404);
+    throw new AppError(`Can't find ${req.originalUrl} on this server`, 404);
   })
 );
 

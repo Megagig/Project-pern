@@ -1,6 +1,8 @@
 const user = require('../db/models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 // Generate a token
 const generateToken = (payload) => {
@@ -8,17 +10,14 @@ const generateToken = (payload) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
-const signup = async (req, res) => {
+const signup = catchAsync(async (req, res) => {
   // Get the request body
   const body = req.body;
 
   // Check if the user type is valid
 
   if (!['1', '2'].includes(body.userType)) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Invalid user type',
-    });
+    throw new AppError('Invalid user type', 400);
   }
 
   // Create a new user
@@ -31,6 +30,11 @@ const signup = async (req, res) => {
     confirmPassword: body.confirmPassword,
   });
 
+  // Check if the user was created
+  if (!newUser) {
+    return next(new AppError('Failed to create the user', 400));
+  }
+
   // Remove password and deletedAt from the response
   const result = newUser.toJSON();
   delete result.password;
@@ -38,49 +42,39 @@ const signup = async (req, res) => {
 
   result.token = generateToken({ id: result.id });
 
-  // Check if the user was created
-  if (!result) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'Failed to create user',
-    });
-  }
-
   return res.status(201).json({
     status: 'success',
     data: result,
     message: 'User created, please login',
   });
-};
+});
 
-const login = async (req, res, next) => {
+const login = catchAsync(async (req, res, next) => {
   // Get the request body
   const { email, password } = req.body;
 
   // Check if the email and password are provided
+  // if (!email || !password) {
+  //   return res.status(400).json({
+  //     status: 'error',
+  //     message: 'Please provide email and password',
+  //   });
+  // }
+
   if (!email || !password) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Please provide email and password',
-    });
+    return next(new AppError('Please provide email and password', 400));
   }
 
   // Check if the user exists
   const existingUser = await user.findOne({ where: { email } });
   if (!existingUser) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'Invalid email or password',
-    });
+    return next(new AppError('Incorrect email or password', 401));
   }
 
   // check if the password matches
   isPasswordMatch = await bcrypt.compare(password, existingUser.password);
   if (!isPasswordMatch) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'Invalid email or password',
-    });
+    return next(new AppError('Incorrect email or password', 401));
   }
   // Generate a JWT token
   const token = generateToken({
@@ -95,6 +89,6 @@ const login = async (req, res, next) => {
       user: existingUser,
     }, // Return the JWT token and the user data
   });
-};
+});
 
 module.exports = { signup, login };
