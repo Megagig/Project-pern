@@ -1,6 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const authRoute = require('./routes/authRoute');
+const catchAsync = require('./utils/catchAsync');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 
 dotenv.config();
 
@@ -21,12 +24,14 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoute);
 
 //handle not found routes after all routes
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-  });
-});
+app.use(
+  '*',
+  catchAsync(async (req, res, next) => {
+    throw new AppError('404 Not Found', 404);
+  })
+);
+
+app.use(globalErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
