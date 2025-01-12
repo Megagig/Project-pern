@@ -23,14 +23,20 @@ const createProject = catchAsync(async (req, res) => {
   });
 });
 
-const getProjects = catchAsync(async (req, res) => {});
+const getAllProjects = catchAsync(async (req, res) => {
+  const projects = await project.findAll();
+  return res.status(200).json({
+    status: 'success',
+    data: projects,
+  });
+});
 const getProject = catchAsync(async (req, res) => {});
 const updateProject = catchAsync(async (req, res) => {});
 const deleteProject = catchAsync(async (req, res) => {});
 
 module.exports = {
   createProject,
-  getProjects,
+  getAllProjects,
   getProject,
   updateProject,
   deleteProject,

@@ -1,5 +1,8 @@
 const express = require('express');
-const { createProject } = require('../controllers/projectController');
+const {
+  createProject,
+  getAllProjects,
+} = require('../controllers/projectController');
 const {
   authentication,
   authorization,
@@ -8,5 +11,6 @@ const {
 const router = express.Router();
 
 router.post('/', authentication, authorization('0', '1'), createProject);
+router.get('/', authentication, getAllProjects);
 
 module.exports = router;
