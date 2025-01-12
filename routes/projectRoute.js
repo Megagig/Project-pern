@@ -4,6 +4,7 @@ const {
   getAllProjects,
   getProjectById,
   updateProject,
+  deleteProject,
 } = require('../controllers/projectController');
 const {
   authentication,
@@ -13,8 +14,9 @@ const {
 const router = express.Router();
 
 router.post('/', authentication, authorization('0', '1'), createProject);
-router.get('/', authentication, getAllProjects);
-router.get('/:id', authentication, getProjectById);
+router.get('/', authentication, authorization('0', '1'), getAllProjects);
+router.get('/:id', authentication, authorization('0', '1'), getProjectById);
 router.patch('/:id', authentication, authorization('0', '1'), updateProject);
+router.delete('/:id', authentication, authorization('0', '1'), deleteProject);
 
 module.exports = router;

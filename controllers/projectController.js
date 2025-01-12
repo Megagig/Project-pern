@@ -76,7 +76,26 @@ const updateProject = catchAsync(async (req, res, next) => {
     data: updatedResult,
   });
 });
-const deleteProject = catchAsync(async (req, res) => {});
+const deleteProject = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const projectId = req.params.id;
+  const body = req.body;
+
+  const result = await project.findOne({
+    where: { id: projectId, createdBy: userId },
+  });
+
+  if (!result) {
+    return next(new AppError('Invalid project id', 400));
+  }
+
+  await result.destroy();
+
+  return res.json({
+    status: 'success',
+    message: 'Record deleted successfully',
+  });
+});
 
 module.exports = {
   createProject,
