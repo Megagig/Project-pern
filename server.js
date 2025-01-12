@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const authRoute = require('./routes/authRoute');
 const projectRoute = require('./routes/projectRoute');
+const userRoute = require('./routes/userRoute');
 const catchAsync = require('./utils/catchAsync');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -17,6 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/projects', projectRoute);
+app.use('/api/v1/users', userRoute);
 
 //handle not found routes after all routes
 app.use(
